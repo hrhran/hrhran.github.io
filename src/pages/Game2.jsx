@@ -92,10 +92,10 @@ export default function Game2() {
           // Calculate rank when timer hits 0
           setScore((currentScore) => {
             let rank = 'D'
-            if (currentScore >= 10200) rank = 'S'
-            else if (currentScore >= 9500) rank = 'A'
-            else if (currentScore >= 8500) rank = 'B'
-            else if (currentScore >= 7500) rank = 'C'
+            if (currentScore >= 9500) rank = 'S'
+            else if (currentScore >= 8000) rank = 'A'
+            else if (currentScore >= 6500) rank = 'B'
+            else if (currentScore >= 5000) rank = 'C'
             setFinalRank(rank)
 
             // Save stats to localStorage
@@ -389,7 +389,7 @@ export default function Game2() {
 
               {finalRank === 'S' ? (
                 <button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => window.location.href = '/supersecretpage258'}
                   className="px-8 py-4 text-xl font-bold rounded-lg transition-all duration-300"
                   style={{
                     backgroundColor: '#1a1a1a',

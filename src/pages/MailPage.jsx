@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function MailPage() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [selectedMail, setSelectedMail] = useState(null)
   const [showCompose, setShowCompose] = useState(false)
@@ -16,12 +18,14 @@ export default function MailPage() {
 
   // Get game stats from localStorage
   const getGameStats = () => {
-    const game1Attempts = localStorage.getItem('game1_attempts') || 0
-    const game2Attempts = localStorage.getItem('game2_attempts') || 0
+    const game1Attempts = localStorage.getItem('game1_attempts') || 1
+    const game2Attempts = localStorage.getItem('game2_attempts') || 1
+    const game3Attempts = localStorage.getItem('game3_attempts') || 1
 
     return {
       game1Attempts,
       game2Attempts,
+      game3Attempts,
     }
   }
 
@@ -52,6 +56,11 @@ export default function MailPage() {
             <p style="color: #202124;"><strong>Attempts:</strong> ${stats.game2Attempts}</p>
           </div>
 
+          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #1a73e8; margin-top: 0;">Game 3: Reach the Office</h4>
+            <p style="color: #202124;"><strong>Attempts:</strong> ${stats.game3Attempts}</p>
+          </div>
+
           <p style="margin-top: 30px; color: #202124;">Your dedication and skill have not gone unnoticed. We look forward to your continued excellence.</p>
 
           <p style="margin-top: 20px; color: #202124;">Best regards,<br/>
@@ -60,8 +69,36 @@ export default function MailPage() {
         </div>
       `,
     },
-    {
+        {
       id: 2,
+      from: 'CRS HR Team',
+      subject: 'Share feedback on your experience',
+      preview: 'Click "Compose" to share feedback on the experience...',
+      time: '3:00 PM',
+      body: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #202124;">
+          <h2 style="color: #1a73e8;">Hey there! 👋</h2>
+          <p style="color: #202124;">Thanks for taking part on the CRS onboarding experience.</p>
+
+          <p style="color: #202124; margin-top: 20px;">
+            How buggy was it? Anything else?
+          </p>
+
+          <div style="background: #e8f0fe; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #1a73e8;">
+            <p style="color: #202124; margin: 0; font-size: 16px;">
+              <strong>Click "Compose"</strong> at the top left to share your feedback on the experience.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px; color: #202124;">
+            Cheers,<br/>
+            <strong>Hrhran</strong>
+          </p>
+        </div>
+      `,
+    },
+    {
+      id: 3,
       from: 'UPS Delivery',
       subject: 'Amazon Order Delivered',
       preview: 'Your package has been delivered to your doorstep...',
@@ -102,7 +139,7 @@ export default function MailPage() {
       `,
     },
     {
-      id: 3,
+      id: 4,
       from: 'Unknown Sender',
       subject: 'Whos this diva ???',
       preview: 'Check out this amazing photo...',
@@ -116,6 +153,31 @@ export default function MailPage() {
             style="width: 50%;height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);text-align: center;"
             src="https://i.ibb.co/S4v0RYx8/final.png"
             alt="Mystery Diva"
+            style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+          />
+
+          <p style="margin-top: 30px; color: #393939; font-style: italic;">
+            End of the line.
+          </p>
+        </div>
+      `,
+    },
+        {
+      id: 5,
+      from: 'Archelogical Society',
+      subject: 'The Dragon Egg of Himalayas',
+      preview: 'Check out this amazing photo...',
+      time: '9:15 AM',
+      body: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center; color: #202124;">
+          <h2 style="color: #333;">The Dragon Egg of Himalayas</h2>
+          <p style="color: #666; margin-bottom: 30px;">Hello there, I found this egg on parvati river, straight from the Himalayas. There is a natural engraving. Nature doing her art.</p>
+          <p style="color: #666; margin-bottom: 30px;">But does the engraving read anything to you?</p>
+
+          <img
+            style="width: 50%;height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);text-align: center;"
+            src="https://i.ibb.co/8nDZ9knD/dragon-egg.jpg"
+            alt="Engraving"
             style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
           />
 
@@ -197,7 +259,11 @@ export default function MailPage() {
               <path d="M10 6v4l3 3" stroke="#5f6368" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </button>
-          <button className="p-2 hover:bg-gray-100 rounded-full">
+          <button
+            onClick={() => navigate('/')}
+            className="p-2 hover:bg-gray-100 rounded-full"
+            title="Logout"
+          >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <circle cx="10" cy="10" r="8" fill="#5f6368"/>
             </svg>
@@ -455,10 +521,11 @@ export default function MailPage() {
               <input type="hidden" name="subject" value="Experience Feedback" />
               <input type="hidden" name="game1_attempts" value={stats.game1Attempts} />
               <input type="hidden" name="game2_attempts" value={stats.game2Attempts} />
+              <input type="hidden" name="game3_attempts" value={stats.game3Attempts} />
               <input
                 type="hidden"
                 name="stats_summary"
-                value={`Game 1 Attempts: ${stats.game1Attempts} | Game 2 Attempts: ${stats.game2Attempts}`}
+                value={`Game 1 Attempts: ${stats.game1Attempts} | Game 2 Attempts: ${stats.game2Attempts} | Game 3 Attempts: ${stats.game3Attempts}`}
               />
 
               {/* Footer with Send Button */}

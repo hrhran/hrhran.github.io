@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-green-400 font-mono">
-      <section className="h-screen w-screen flex flex-col items-center justify-center text-center relative">
+      <section className="h-screen w-full flex flex-col items-center justify-center text-center relative">
         <h1 className="text-6xl font-bold text-green-400">HARIHARAN.S</h1>
         <p className="text-2xl text-blue-300">Full Stack Developer</p>
         <div className="flex space-x-4 mt-4">
