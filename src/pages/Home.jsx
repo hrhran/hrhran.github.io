@@ -12,8 +12,8 @@ export default function Home() {
 
   const projects = [
     { name: "Surveyin", link: "https://github.com/hrhran/surveyin" },
-    { name: "ChatGPT", link: "https://chat.com" },
-    { name: "NASA", link: "https://nasa.gov" },
+    { name: "Rel.ai", link: "" },
+    { name: "Platform Builder", link: "" },
   ];
 
   const skills = ["Javascript", "React", "Node", "Python", "Go", "MongoDB", "MySQL", "Git", "Figma"];

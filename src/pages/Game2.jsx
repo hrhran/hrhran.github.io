@@ -92,16 +92,14 @@ export default function Game2() {
           // Calculate rank when timer hits 0
           setScore((currentScore) => {
             let rank = 'D'
-            if (currentScore >= 9500) rank = 'S'
-            else if (currentScore >= 8000) rank = 'A'
-            else if (currentScore >= 6500) rank = 'B'
-            else if (currentScore >= 5000) rank = 'C'
+            if (currentScore >= 9000) rank = 'S'
+            else if (currentScore >= 7200) rank = 'A'
+            else if (currentScore >= 5400) rank = 'B'
+            else if (currentScore >= 3600) rank = 'C'
             setFinalRank(rank)
 
-            // Save stats to localStorage
-            const attempts = parseInt(localStorage.getItem('game2_attempts') || '0') + 1
-            localStorage.setItem('game2_attempts', attempts.toString())
-
+            // Don't increment attempts on first completion - only on retry
+            // Save best score
             const bestScore = parseInt(localStorage.getItem('game2_best_score') || '0')
             if (currentScore > bestScore) {
               localStorage.setItem('game2_best_score', currentScore.toString())
@@ -413,7 +411,13 @@ export default function Game2() {
                 </button>
               ) : (
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => {
+                    // Increment game2 attempts
+                    const attempts = parseInt(localStorage.getItem('game2_attempts') || '1') + 1
+                    localStorage.setItem('game2_attempts', attempts.toString())
+                    // Restart the game
+                    window.location.reload()
+                  }}
                   className="px-8 py-4 text-xl font-bold rounded-lg transition-all duration-300"
                   style={{
                     backgroundColor: '#2a2a2a',

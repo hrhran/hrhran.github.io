@@ -11,7 +11,7 @@ export default function Game1() {
   const [countdownNumber, setCountdownNumber] = useState(3)
   const [gameStarted, setGameStarted] = useState(false)
   const [, setScore] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(45)
+  const [timeLeft, setTimeLeft] = useState(30)
   const [gameOver, setGameOver] = useState(false)
   const [showBloodSplash, setShowBloodSplash] = useState(false)
   const [victory, setVictory] = useState(false)
@@ -38,7 +38,7 @@ export default function Game1() {
       setCountdownNumber(3)
       setGameStarted(false)
       setScore(0)
-      setTimeLeft(45)
+      setTimeLeft(30)
       setGameOver(false)
       setShowBloodSplash(false)
       setVictory(false)
@@ -47,6 +47,12 @@ export default function Game1() {
       setBasketX(50)
       setFallingItems([])
       setIsFirstGame(true)
+
+      // Initialize all game attempts to 1
+      localStorage.setItem('game1_attempts', '1')
+      localStorage.setItem('game2_attempts', '1')
+      localStorage.setItem('game3_attempts', '1')
+      localStorage.setItem('game4_attempts', '1')
     }
     // Clear retry flag after checking
     sessionStorage.removeItem('game1_retry')
@@ -68,7 +74,7 @@ export default function Game1() {
   // Lore text typing effect
   useEffect(() => {
     if (!showLore) return
-    const fullText = "WE'RE SHORT ON STAFF. HELP US CATCH OUR CLIENTS..."
+    const fullText = "CATCH THE CLIENTS"
     let currentIndex = 0
 
     const typingInterval = setInterval(() => {
@@ -82,7 +88,7 @@ export default function Game1() {
           setShowCountdown(true)
         }, 1000)
       }
-    }, 50) // 50ms per character
+    }, 80) // 80ms per character for dramatic effect
 
     return () => clearInterval(typingInterval)
   }, [showLore])
@@ -114,9 +120,7 @@ export default function Game1() {
         if (prev <= 1) {
           // Victory when time runs out without missing
           setVictory(true)
-          // Save stats to localStorage
-          const attempts = parseInt(localStorage.getItem('game1_attempts') || '0') + 1
-          localStorage.setItem('game1_attempts', attempts.toString())
+          // Don't increment attempts on victory - only on retry
           return 0
         }
         return prev - 1
@@ -267,46 +271,104 @@ export default function Game1() {
 
       {/* Game Content - Hidden on mobile/tablet */}
       <div className="hidden lg:block">
-      {/* CRS Splash Screen */}
+      {/* Welcome Splash Screen */}
       {showSplash && (
         <div
           className={
-            `fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-gray-100 ` +
+            `fixed inset-0 z-50 flex flex-col items-center justify-center text-gray-100 ` +
             `transition-opacity duration-700 ease-out ` +
             (fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100')
           }
-          style={{ fontFamily: 'Georgia, "Times New Roman", Garamond, serif' }}
+          style={{
+            fontFamily: '"Courier New", Courier, monospace',
+            background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
+          }}
         >
-          <div className="text-center">
-            <div className="text-6xl md:text-8xl tracking-widest font-semibold">CRS</div>
-            <div className="mt-2 text-gray-400 uppercase tracking-[0.3em] text-sm">
-              Consumer Recreational Services
-            </div>
-          </div>
-          <div className="absolute bottom-10 text-center text-gray-400">
-            <p className="text-sm md:text-base mb-6">You have been invited by Hariharan to play</p>
-            <button
-              onClick={handleProceed}
-              className="px-8 py-3 text-lg font-semibold rounded-lg transition-all duration-300"
+          {/* Retro scanline effect */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, transparent 1px, transparent 2px, rgba(0,0,0,0.15) 3px)',
+              opacity: 0.3,
+            }}
+          />
+
+          <div className="text-center relative z-10">
+            {/* Main Title */}
+            <div
+              className="text-7xl md:text-9xl font-bold mb-8"
               style={{
-                backgroundColor: '#1a1a1a',
-                color: '#d4af37',
-                border: '2px solid #d4af37',
-                boxShadow: '0 0 20px rgba(212, 175, 55, 0.3)',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#d4af37'
-                e.currentTarget.style.color = '#000'
-                e.currentTarget.style.boxShadow = '0 0 30px rgba(212, 175, 55, 0.6)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#1a1a1a'
-                e.currentTarget.style.color = '#d4af37'
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(212, 175, 55, 0.3)'
+                color: '#4a9d5f',
+                textShadow: '0 0 5px rgba(74, 157, 95, 0.3)',
+                letterSpacing: '0.1em',
               }}
             >
-              PROCEED
+              THE GAMES
+            </div>
+
+            {/* Subtitle */}
+            <div
+              className="text-2xl md:text-3xl mb-12"
+              style={{
+                color: '#6ab583',
+                opacity: 0.8,
+                letterSpacing: '0.3em',
+              }}
+            >
+              WELCOME
+            </div>
+          </div>
+
+          {/* Bottom section */}
+          <div className="absolute bottom-16 text-center">
+            {/* Charger reminder */}
+            <div
+              className="text-xs md:text-sm mb-6"
+              style={{
+                color: '#6ab583',
+                opacity: 0.6,
+                letterSpacing: '0.1em',
+              }}
+            >
+              PLUG-IN CHARGER FOR BETTER EXPERIENCE
+              <br />
+              (IGNORE IF DESKTOP)
+            </div>
+
+            <div
+              className="text-sm md:text-base mb-8"
+              style={{
+                color: '#6ab583',
+                opacity: 0.7,
+                letterSpacing: '0.2em',
+              }}
+            >
+              ► PRESS TO CONTINUE ◄
+            </div>
+            <button
+              onClick={handleProceed}
+              className="px-12 py-4 text-xl font-bold transition-all duration-300"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#4a9d5f',
+                border: '3px solid #4a9d5f',
+                boxShadow: '0 0 15px rgba(74, 157, 95, 0.2), inset 0 0 15px rgba(74, 157, 95, 0.1)',
+                cursor: 'pointer',
+                letterSpacing: '0.2em',
+                fontFamily: '"Courier New", Courier, monospace',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#4a9d5f'
+                e.currentTarget.style.color = '#000'
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(74, 157, 95, 0.6), inset 0 0 20px rgba(74, 157, 95, 0.2)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = '#4a9d5f'
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(74, 157, 95, 0.2), inset 0 0 15px rgba(74, 157, 95, 0.1)'
+              }}
+            >
+              START
             </button>
           </div>
         </div>
@@ -491,22 +553,29 @@ export default function Game1() {
           {/* Lore Text Overlay */}
           {showLore && (
             <div
-              className="absolute inset-0 flex items-start justify-center z-50"
+              className="absolute inset-0 flex items-center justify-center z-50"
               style={{
-                paddingTop: '8%',
-                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                backgroundColor: 'rgba(0, 0, 0, 0.85)',
               }}
             >
               <div
-                className="text-4xl font-bold text-center px-8"
+                className="text-5xl md:text-6xl font-bold text-center px-8"
                 style={{
-                  color: '#fff',
-                  textShadow: '0 0 10px rgba(0, 0, 0, 0.8)',
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  letterSpacing: '0.05em',
+                  color: '#00ff41',
+                  textShadow: '0 0 10px #00ff41, 0 0 20px #00ff41',
+                  fontFamily: '"Courier New", Courier, monospace',
+                  letterSpacing: '0.15em',
                 }}
               >
                 {loreText}
+                <span
+                  style={{
+                    animation: 'blink 1s infinite',
+                    marginLeft: '0.1em',
+                  }}
+                >
+                  _
+                </span>
               </div>
             </div>
           )}
@@ -612,7 +681,7 @@ export default function Game1() {
                   setVictory(false)
                   setGameStarted(false)
                   setScore(0)
-                  setTimeLeft(45)
+                  setTimeLeft(30)
                   setFallingItems([])
                   setCountdownNumber(3)
                   setShowCountdown(true)
@@ -641,57 +710,76 @@ export default function Game1() {
 
           {/* Victory Screen */}
           {victory && !showElevator && (
-            <div className="absolute inset-0 bg-black flex flex-col items-center justify-center z-40">
-              <h1
-                className="text-6xl font-bold mb-8"
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center z-40"
+              style={{
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a0a0a 100%)',
+              }}
+            >
+              {/* Glitch effect overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none"
                 style={{
-                  color: '#00ff00',
-                  textShadow: '0 0 20px rgba(0, 255, 0, 0.8)',
-                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  background: 'repeating-linear-gradient(0deg, rgba(255,0,0,0.03) 0px, transparent 2px, transparent 4px, rgba(255,0,0,0.03) 6px)',
+                  opacity: 0.4,
+                }}
+              />
+
+              <h1
+                className="text-7xl font-bold mb-12 relative z-10"
+                style={{
+                  color: '#ff4444',
+                  textShadow: '0 0 20px rgba(255, 68, 68, 0.6), 0 0 40px rgba(255, 68, 68, 0.3)',
+                  fontFamily: '"Courier New", Courier, monospace',
+                  letterSpacing: '0.15em',
                 }}
               >
-                GOOD JOB
+                IMPRESSIVE
               </h1>
 
-              {/* Blinking Eye */}
+              {/* Blinking Eye with red glow */}
               <div
-                className="my-8"
+                className="my-8 relative z-10"
                 style={{
-                  fontSize: '120px',
-                  animation: 'blink 3s infinite',
+                  fontSize: '140px',
+                  animation: 'blink 2.5s infinite',
+                  filter: 'drop-shadow(0 0 20px rgba(255, 68, 68, 0.5))',
                 }}
               >
                 👁️
               </div>
 
               <p
-                className="text-3xl mb-4"
+                className="text-2xl mb-4 relative z-10"
                 style={{
-                  color: '#888',
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  letterSpacing: '0.05em',
+                  color: '#999',
+                  fontFamily: '"Courier New", Courier, monospace',
+                  letterSpacing: '0.2em',
                 }}
               >
-                WE&apos;LL BE WATCHING YOU
+                YOU&apos;VE BEEN NOTICED
               </p>
 
               <div
-                className="text-5xl font-bold mt-8"
+                className="text-6xl font-bold mt-12 relative z-10"
                 style={{
-                  color: '#fff',
-                  textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+                  color: '#ff4444',
+                  textShadow: '0 0 15px rgba(255, 68, 68, 0.8)',
+                  fontFamily: '"Courier New", Courier, monospace',
                 }}
               >
                 {countdown}
               </div>
 
               <p
-                className="text-xl mt-4"
+                className="text-lg mt-4 relative z-10"
                 style={{
                   color: '#666',
+                  fontFamily: '"Courier New", Courier, monospace',
+                  letterSpacing: '0.15em',
                 }}
               >
-                TAKING YOU TO THE BASEMENT...
+                DESCENDING TO LEVEL 2...
               </p>
             </div>
           )}
@@ -812,6 +900,15 @@ export default function Game1() {
           100% {
             opacity: 0;
             filter: brightness(0);
+          }
+        }
+
+        @keyframes blink {
+          0%, 49% {
+            opacity: 1;
+          }
+          50%, 100% {
+            opacity: 0;
           }
         }
       `}</style>

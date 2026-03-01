@@ -1,12 +1,34 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 
 export default function MailPage() {
   const navigate = useNavigate()
+  const { mailId } = useParams()
+  const location = useLocation()
   const [loading, setLoading] = useState(true)
   const [selectedMail, setSelectedMail] = useState(null)
   const [showCompose, setShowCompose] = useState(false)
   const [composing, setComposing] = useState(false)
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [attachmentModal, setAttachmentModal] = useState(null)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+
+  // Get game stats from localStorage - use regular attempts (not final_*)
+  const getGameStats = () => {
+    const game1Attempts = localStorage.getItem('game1_attempts') || '1'
+    const game2Attempts = localStorage.getItem('game2_attempts') || '1'
+    const game3Attempts = localStorage.getItem('game3_attempts') || '1'
+    const game4Attempts = localStorage.getItem('game4_attempts') || '1'
+
+    return {
+      game1Attempts,
+      game2Attempts,
+      game3Attempts,
+      game4Attempts,
+    }
+  }
+
+  const stats = getGameStats()
 
   // Fake loader - 2 seconds
   useEffect(() => {
@@ -16,28 +38,33 @@ export default function MailPage() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Get game stats from localStorage
-  const getGameStats = () => {
-    const game1Attempts = localStorage.getItem('game1_attempts') || 1
-    const game2Attempts = localStorage.getItem('game2_attempts') || 1
-    const game3Attempts = localStorage.getItem('game3_attempts') || 1
-
-    return {
-      game1Attempts,
-      game2Attempts,
-      game3Attempts,
+  // Handle browser back button - show modal when trying to leave mail page
+  useEffect(() => {
+    const handlePopState = (e) => {
+      // If we're at the base mail route and user hits back, show confirmation
+      if (location.pathname === '/supersecretmail400') {
+        e.preventDefault()
+        setShowLeaveModal(true)
+        // Push state back so we stay on the page
+        window.history.pushState(null, '', '/supersecretmail400')
+      }
     }
-  }
 
-  const stats = getGameStats()
+    window.addEventListener('popstate', handlePopState)
 
-  const emails = [
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [location.pathname])
+
+  const emails = useMemo(() => [
     {
       id: 1,
       from: 'CRS Management',
       subject: 'You have been selected.',
       preview: 'Congratulations! Your performance has been exceptional...',
       time: '2:30 PM',
+      attachments: [],
       body: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #202124;">
           <h2 style="color: #1a73e8;">Congratulations!</h2>
@@ -57,8 +84,13 @@ export default function MailPage() {
           </div>
 
           <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="color: #1a73e8; margin-top: 0;">Game 3: Reach the Office</h4>
+            <h4 style="color: #1a73e8; margin-top: 0;">Game 3: Tennis Boss Battle</h4>
             <p style="color: #202124;"><strong>Attempts:</strong> ${stats.game3Attempts}</p>
+          </div>
+
+          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #1a73e8; margin-top: 0;">Game 4: Reach the Office</h4>
+            <p style="color: #202124;"><strong>Attempts:</strong> ${stats.game4Attempts}</p>
           </div>
 
           <p style="margin-top: 30px; color: #202124;">Your dedication and skill have not gone unnoticed. We look forward to your continued excellence.</p>
@@ -69,40 +101,14 @@ export default function MailPage() {
         </div>
       `,
     },
-        {
-      id: 2,
-      from: 'CRS HR Team',
-      subject: 'Share feedback on your experience',
-      preview: 'Click "Compose" to share feedback on the experience...',
-      time: '3:00 PM',
-      body: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #202124;">
-          <h2 style="color: #1a73e8;">Hey there! 👋</h2>
-          <p style="color: #202124;">Thanks for taking part on the CRS onboarding experience.</p>
 
-          <p style="color: #202124; margin-top: 20px;">
-            How buggy was it? Anything else?
-          </p>
-
-          <div style="background: #e8f0fe; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #1a73e8;">
-            <p style="color: #202124; margin: 0; font-size: 16px;">
-              <strong>Click "Compose"</strong> at the top left to share your feedback on the experience.
-            </p>
-          </div>
-
-          <p style="margin-top: 30px; color: #202124;">
-            Cheers,<br/>
-            <strong>Hrhran</strong>
-          </p>
-        </div>
-      `,
-    },
     {
-      id: 3,
+      id: 2,
       from: 'UPS Delivery',
       subject: 'Amazon Order Delivered',
       preview: 'Your package has been delivered to your doorstep...',
       time: '11:45 AM',
+      attachments: [],
       body: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #202124;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -139,22 +145,23 @@ export default function MailPage() {
       `,
     },
     {
-      id: 4,
+      id: 3,
       from: 'Unknown Sender',
       subject: 'Whos this diva ???',
       preview: 'Check out this amazing photo...',
       time: '9:15 AM',
+      attachments: [
+        {
+          name: 'mystery-diva.png',
+          size: '1.4 MB',
+          url: 'https://i.ibb.co/S4v0RYx8/final.png',
+          type: 'image/png'
+        }
+      ],
       body: `
         <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center; color: #202124;">
           <h2 style="color: #333;">Whos this diva ???</h2>
           <p style="color: #666; margin-bottom: 30px;">Someone sent you this mysterious photo...</p>
-
-          <img
-            style="width: 50%;height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);text-align: center;"
-            src="https://i.ibb.co/S4v0RYx8/final.png"
-            alt="Mystery Diva"
-            style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
-          />
 
           <p style="margin-top: 30px; color: #393939; font-style: italic;">
             End of the line.
@@ -162,32 +169,85 @@ export default function MailPage() {
         </div>
       `,
     },
-        {
-      id: 5,
+    {
+      id: 4,
       from: 'Archelogical Society',
       subject: 'The Dragon Egg of Himalayas',
-      preview: 'Check out this amazing photo...',
-      time: '9:15 AM',
+      preview: 'I found this egg on parvati river...',
+      time: '8:30 AM',
+      attachments: [
+        {
+          name: 'dragon-egg.jpg',
+          size: '2.1 MB',
+          url: 'https://i.ibb.co/8nDZ9knD/dragon-egg.jpg',
+          type: 'image/jpeg'
+        }
+      ],
       body: `
         <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center; color: #202124;">
           <h2 style="color: #333;">The Dragon Egg of Himalayas</h2>
           <p style="color: #666; margin-bottom: 30px;">Hello there, I found this egg on parvati river, straight from the Himalayas. There is a natural engraving. Nature doing her art.</p>
           <p style="color: #666; margin-bottom: 30px;">But does the engraving read anything to you?</p>
 
-          <img
-            style="width: 50%;height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);text-align: center;"
-            src="https://i.ibb.co/8nDZ9knD/dragon-egg.jpg"
-            alt="Engraving"
-            style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
-          />
-
           <p style="margin-top: 30px; color: #393939; font-style: italic;">
             End of the line.
           </p>
         </div>
       `,
     },
-  ]
+    {
+      id: 5,
+      from: 'CRS HR Team',
+      subject: 'Share feedback on your experience',
+      preview: 'Click "Compose" to share feedback on the experience...',
+      time: '3:00 PM',
+      attachments: [],
+      body: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #202124;">
+          <h2 style="color: #1a73e8;">Hey there! 👋</h2>
+          <p style="color: #202124;">Thanks for taking part on the CRS onboarding experience.</p>
+
+          <p style="color: #202124; margin-top: 20px;">
+            How buggy was it? Anything else?
+          </p>
+
+          <div style="background: #e8f0fe; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #1a73e8;">
+            <p style="color: #202124; margin: 0; font-size: 16px;">
+              <strong>Click "Compose"</strong> at the top left to share your feedback on the experience.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px; color: #202124;">
+            Cheers,<br/>
+            <strong>Hrhran</strong>
+          </p>
+        </div>
+      `,
+    },
+  ], [stats.game1Attempts, stats.game2Attempts, stats.game3Attempts, stats.game4Attempts])
+
+  // Handle mail selection from URL parameter
+  useEffect(() => {
+    if (mailId && !loading) {
+      const mail = emails.find(e => e.id === parseInt(mailId))
+      if (mail) {
+        setSelectedMail(mail)
+      }
+    } else if (!mailId) {
+      setSelectedMail(null)
+    }
+  }, [mailId, loading, emails])
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showUserMenu && !e.target.closest('.relative')) {
+        setShowUserMenu(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [showUserMenu])
 
   if (loading) {
     return (
@@ -259,15 +319,35 @@ export default function MailPage() {
               <path d="M10 6v4l3 3" stroke="#5f6368" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </button>
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            title="Logout"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="8" fill="#5f6368"/>
-            </svg>
-          </button>
+
+          {/* User Icon with Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white font-semibold text-sm transition"
+              title="Account"
+            >
+              U
+            </button>
+
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false)
+                    navigate('/')
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M11 11l3-3-3-3M14 8H6" stroke="#5f6368" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -368,7 +448,7 @@ export default function MailPage() {
                 {emails.map((email) => (
                   <div
                     key={email.id}
-                    onClick={() => setSelectedMail(email)}
+                    onClick={() => navigate(`/supersecretmail400/read/${email.id}`)}
                     className="flex items-center gap-4 px-6 py-3 hover:shadow-md cursor-pointer transition border-l-4 border-transparent hover:border-l-blue-500 bg-white hover:bg-gray-50"
                   >
                     {/* Checkbox */}
@@ -408,7 +488,7 @@ export default function MailPage() {
               {/* Toolbar */}
               <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-200 bg-white sticky top-0 z-10">
                 <button
-                  onClick={() => setSelectedMail(null)}
+                  onClick={() => navigate('/supersecretmail400')}
                   className="p-2 hover:bg-gray-100 rounded"
                   title="Back to inbox"
                 >
@@ -455,6 +535,46 @@ export default function MailPage() {
                   className="prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: selectedMail.body }}
                 />
+
+                {/* Attachments Section */}
+                {selectedMail.attachments && selectedMail.attachments.length > 0 && (
+                  <div className="mt-6 border-t border-gray-200 pt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M14 9.5v3a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5v-3M11 5L8 2 5 5M8 2v8" stroke="#5f6368" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span className="text-sm text-gray-600 font-medium">
+                        {selectedMail.attachments.length} Attachment{selectedMail.attachments.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {selectedMail.attachments.map((attachment, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setAttachmentModal(attachment)}
+                          className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition group"
+                          style={{ width: '280px' }}
+                        >
+                          {/* Thumbnail */}
+                          <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="#5f6368"/>
+                            </svg>
+                          </div>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
+                              {attachment.name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {attachment.size}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -522,10 +642,11 @@ export default function MailPage() {
               <input type="hidden" name="game1_attempts" value={stats.game1Attempts} />
               <input type="hidden" name="game2_attempts" value={stats.game2Attempts} />
               <input type="hidden" name="game3_attempts" value={stats.game3Attempts} />
+              <input type="hidden" name="game4_attempts" value={stats.game4Attempts} />
               <input
                 type="hidden"
                 name="stats_summary"
-                value={`Game 1 Attempts: ${stats.game1Attempts} | Game 2 Attempts: ${stats.game2Attempts} | Game 3 Attempts: ${stats.game3Attempts}`}
+                value={`Game 1 Attempts: ${stats.game1Attempts} | Game 2 Attempts: ${stats.game2Attempts} | Game 3 Attempts: ${stats.game3Attempts} | Game 4 Attempts: ${stats.game4Attempts}`}
               />
 
               {/* Footer with Send Button */}
@@ -546,6 +667,92 @@ export default function MailPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Leave Confirmation Modal */}
+      {showLeaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Leave this page?</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to leave? Your game progress has been saved.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowLeaveModal(false)}
+                className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded transition"
+              >
+                Stay
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-6 py-2 text-white bg-red-600 hover:bg-red-700 rounded transition"
+              >
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attachment Viewer Modal */}
+      {attachmentModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          onClick={() => setAttachmentModal(null)}
+        >
+          <div className="relative max-w-6xl max-h-[90vh] w-full">
+            {/* Close Button */}
+            <button
+              onClick={() => setAttachmentModal(null)}
+              className="absolute -top-12 right-0 w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-white transition z-10"
+            >
+              X
+            </button>
+
+            {/* Image Container */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-2xl">
+              {/* Header */}
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M17 15V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2zM7 11l2 2.5L11.5 10l3.5 5H5l2-4z" fill="#5f6368"/>
+                  </svg>
+                  <div>
+                    <div className="font-medium text-gray-900">{attachmentModal.name}</div>
+                    <div className="text-sm text-gray-500">{attachmentModal.size}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image */}
+              <div className="flex items-center justify-center bg-gray-100 p-8" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+                <img
+                  src={attachmentModal.url}
+                  alt={attachmentModal.name}
+                  className="max-w-full max-h-full object-contain rounded"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  Click outside to close
+                </div>
+                <a
+                  href={attachmentModal.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Open in new tab
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
